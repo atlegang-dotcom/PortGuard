@@ -1,11 +1,8 @@
-Port Guard
+PortGuard
 
-A simple command line tool designed to protect your device against potential hacks from hackers by alerting you and showing a IP address that scanned your device for open ports with a time window severity check.
+A command-line tool that detects TCP port scanning against your device. It monitors incoming SYN packets and tracks how many distinct ports each source IP touches within a rolling time window — the more ports touched in a shorter window, the more aggressive the scan is classified as.
 
-The systems looks at the number of ports a device has scanned with a time window, the ports scanned in said time, the more aggressive the scan is.
-In general some applications do scan a device to look for open ports, in most cases those are harmless scans and usually are required in order for the application to work, it could be a scan for port 443, could just to see if you're running a web server, or for port 22, if a application is planning on SSHing you. These scans are usually one scan to maybe 2 or 3, below 5 or 10, because why would an application or service want to know about so many open ports on your device?
-
-The intention is to spot a potential hack if ever the hacker would want to attack you through any open ports you might not be aware of.
+Some legitimate applications do check for open ports as part of normal operation — checking for port 443 to see if you're running a web server, or port 22 before attempting SSH. This kind of legitimate check typically touches only one or two ports, rarely more than 3-5, because a normal application already knows which specific service it needs and has no reason to probe broadly. A device touching many distinct ports on you in a short window has no such legitimate reason — that pattern is reconnaissance, not service discovery, and is the behavior this tool is built to catch.
 
 1. The detector.py file - features 2 functions
 - (a) is_scan() function 
