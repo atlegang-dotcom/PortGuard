@@ -1,0 +1,28 @@
+Port Guard
+
+A simple command line tool designed to protect your device against potential hacks from hackers by alerting you and showing a IP address that scanned your device for open ports with a time window severity check.
+
+The systems looks at the number of ports a device has scanned with a time window, the ports scanned in said time, the more aggressive the scan is.
+In general some applications do scan a device to look for open ports, in most cases those are harmless scans and usually are required in order for the application to work, it could be a scan for port 443, could just to see if you're running a web server, or for port 22, if a application is planning on SSHing you. These scans are usually one scan to maybe 2 or 3, below 5 or 10, because why would an application or service want to know about so many open ports on your device?
+
+The intention is to spot a potential hack if ever the hacker would want to attack you through any open ports you might not be aware of.
+
+1. The detector.py file - features 2 functions
+- (a) is_scan() function 
+  - Decide whether a distinct-port count within a time window counts as a scan.
+  - takes in 2 arguments:
+    - port_count - number of ports scanned in a time window
+    - threshold - number of ports to confirm it is an actual scan
+  - The threshold will be set by the user admin, depending on what you consider a potential threat, if the port count is greater than the threshold, then it is a valid reconn scan, function returns true, otherwise false
+  - A normal service would typically use not more than 5 ports on your device, and 5 is just strecthing, probably less than 5, however modern day applications could need to run a number of services relying on a number of ports to be open, e.g. a web server app, that sends messages between devices through the SSH protocol, all while saving image, visual and audio data through the ftp protocol, nonetheless, the user will determine the threshold according to the users preference.
+
+- (b) classify_severity() function
+  - Classify how aggressive a detected scan is, based on ports-per-second.
+  - takes in 2 arguments:
+    - port_count - number of ports scanned in a time window
+    - window_seconds - the amount of time it took to scann all ports
+  - the severity will classfied into 3 categories using the formula - port_count / window_seconds = port scan/sec
+    - aggressive - measured if a lot of ports were scanned in a short space of time
+    - moderate - measured if a medium level(less than aggressive greater than low) amount of ports were scanned in a less than aggressive greater than low space of time
+    - slow - measured if a large number of ports was scanned over quite a long period of time
+  - each time taken for each scan doesn't not rule out the potential for it being an attack, even if the ports scanned happened over a long period of time, it just how careful the attacker is - if ever the scan happens to be malicious.
