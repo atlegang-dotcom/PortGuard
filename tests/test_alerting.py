@@ -35,7 +35,7 @@ class TestFormatAlertText:
     def test_includes_severity(self):
         alert = build_alert("10.0.0.5", {80}, "aggressive", 10.0)
         text = format_alert_text(alert)
-        assert "aggressive" in text
+        assert "aggressive".upper() in text
 
 
 class TestLogAlertJson:
