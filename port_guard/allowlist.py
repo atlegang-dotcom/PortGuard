@@ -28,4 +28,7 @@ def load_allowlist(filepath: str) -> Set[str]:
     return result
 
 def is_allowlisted(ip: str, allowlist: Set[str]) -> bool:
-    raise NotImplementedError
+    if ip in allowlist:
+        return True
+    else:
+        return False
