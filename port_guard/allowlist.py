@@ -1,14 +1,7 @@
 # Allowlist layer: known-good IPs that should never trigger an alert.
 
 from typing import Set
-import ipaddress as ip
-
-def check_ip(ip_addr) -> bool:
-    try:
-        ip.ip_address(ip_addr)
-        return True
-    except ValueError:
-        return False
+from port_guard.helper import check_ip
 
 def load_allowlist(filepath: str) -> Set[str]:
     result = set()
@@ -30,5 +23,6 @@ def load_allowlist(filepath: str) -> Set[str]:
 def is_allowlisted(ip: str, allowlist: Set[str]) -> bool:
     if ip in allowlist:
         return True
+
     else:
         return False
