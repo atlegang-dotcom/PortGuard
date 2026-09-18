@@ -23,3 +23,13 @@ Some legitimate applications do check for open ports as part of normal operation
     - moderate - measured if a medium level(less than aggressive greater than low) amount of ports were scanned in a less than aggressive greater than low space of time
     - slow - measured if a large number of ports was scanned over quite a long period of time
   - each time taken for each scan doesn't not rule out the potential for it being an attack, even if the ports scanned happened over a long period of time, it just how careful the attacker is - if ever the scan happens to be malicious.
+
+2. The allowlist.py file - features 2 functions
+- (a) load_allowlist() function
+  - Load a newline-separated file of IP addresses into a set.
+  - takes one argument - filepath: of the file containing ip addresses are not a threat to the system
+- (b) is_allowlisted() function
+  - Check whether `ip` is in `allowlist`.
+  - takes in 2 arguments:
+    - ip - the ip address to checked if it is in the non threat ip addresses
+    - allowlist - the list in a set of allowed ip address that are not considered threats
