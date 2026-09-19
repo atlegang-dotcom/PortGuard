@@ -7,13 +7,16 @@ representing what such a packet would look like. This is closer to
 what you'll see in real capture than mocking would be.
 """
 
-from scapy.all import IP, TCP
+from scapy.all import IP, TCP, IPv6
 
 from port_guard.capture import is_syn_packet, extract_syn_info
 
 
 def make_packet(src="10.0.0.5", dst="10.0.0.1", dport=80, flags="S"):
     return IP(src=src, dst=dst) / TCP(dport=dport, flags=flags)
+
+def make_ipv6_packet(src="fe80::1", dst="fe80::2", dport=80, flags="S"):
+    return IPv6(src=src, dst=dst) / TCP(dport=dport, flags=flags)
 
 
 class TestIsSynPacket:
@@ -61,4 +64,24 @@ class TestExtractSynInfo:
 
     def test_returns_none_for_non_tcp_packet(self):
         pkt = IP(src="10.0.0.5", dst="10.0.0.1")
+        assert extract_syn_info(pkt) is None
+
+
+class TestIPv6Addresses:
+    def test_extracts_src_ip_from_ipv6_packet(self):
+        pkt = make_ipv6_packet(src="fe80::1")
+        info = extract_syn_info(pkt)
+        assert info["src_ip"] == "fe80::1"
+
+    def test_extracts_dst_port_from_ipv6_packet(self):
+        pkt = make_ipv6_packet(dport=22)
+        info = extract_syn_info(pkt)
+        assert info["dst_port"] == 22
+
+    def test_returns_none_for_ipv6_syn_ack_packet(self):
+        pkt = make_ipv6_packet(flags="SA")
+        assert extract_syn_info(pkt) is None
+
+    def test_returns_none_for_ipv6_packet_with_no_tcp_layer(self):
+        pkt = IPv6(src="fe80::1", dst="fe80::2")
         assert extract_syn_info(pkt) is None
