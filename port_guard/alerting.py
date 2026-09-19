@@ -5,17 +5,18 @@ import json
 from typing import Dict, Set
 from port_guard.helper import check_ip
 
-def build_alert(src_ip: str, ports: Set[int], severity: str, window_seconds: float) -> Dict:
+def build_alert(src_ip: str, ports: Set[int], severity: str, window_seconds: float, interface=None) -> Dict:
     return {
         "src_ip": src_ip,
         "port_count": len(ports),
         "ports": sorted(ports),
         "severity": severity,
-        "window_seconds": window_seconds
+        "window_seconds": window_seconds,
+        "interface": interface
     }
 
 def format_alert_text(alert: Dict) -> str:
-    return f"[{alert['severity'].upper()}] {alert['src_ip']} hit {alert['port_count']} in {alert['window_seconds']}s."
+    return f"[{alert['severity'].upper()}] {alert['src_ip']} hit {alert['port_count']} ports in {alert['window_seconds']}s on {alert['interface']}: {alert['ports']}"
 
 
 def log_alert_json(alert: Dict, filepath: str) -> None:
