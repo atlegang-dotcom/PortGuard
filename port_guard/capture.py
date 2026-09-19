@@ -1,7 +1,8 @@
 # Capture layer: recognise SYN packets and pull out the fields we care about. 
 
-from typing import Callable, Dict, Optional
-from scapy.all import IP, TCP
+from typing import Callable, Dict, List, Optional, Union
+from scapy.all import IP, TCP, IPv6, sniff, get_if_list
+from port_guard.helper import ip_filter
 
 
 def is_syn_packet(packet) -> bool:
@@ -12,8 +13,25 @@ def is_syn_packet(packet) -> bool:
 
 
 def extract_syn_info(packet) -> Optional[Dict]:
-    raise NotImplementedError
+    if not is_syn_packet(packet):
+        return None
+
+    src_ip = ip_filter(packet)
+    if src_ip is None:
+        return None
+
+    return {
+        "src_ip": src_ip,
+        "dst_port": packet[TCP].dport,
+        "timestamp": float(packet.time),
+        "interface": getattr(packet, "sniffed_on", None)
+    }
 
 
-def start_capture(interface: str, on_packet: Callable) -> None:
-    raise NotImplementedError
+def start_capture(on_packet: Callable) -> None:
+    sniff(
+        iface=get_if_list(),
+        filter="tcp",
+        prn=on_packet,
+        store=False
+    )
