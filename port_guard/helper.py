@@ -7,3 +7,12 @@ def check_ip(ip_addr) -> bool:
         return True
     except ValueError:
         return False
+
+# checks or validates if a port scanned/hit is within the range now - timestamp <= window_seconds
+def filter_hits(hits: list, window: float, now: float) -> bool:
+    result = []
+    for hit in hits:
+        if now - hit[1] <= window:
+            result.append([hit[0], hit[1]])
+
+    return result
