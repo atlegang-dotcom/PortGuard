@@ -55,3 +55,26 @@ Some legitimate applications do check for open ports as part of normal operation
     - filepath - the file to log the json alerts to
 
 ~ The alerting.py file will act as a module to simply build the alerts structure, calling each function under a specific section in the codebase but for only building, logging and saving the alerts/hits
+
+4. The tracker.py file - features a class with 1 constructor and 3 methods:
+- (a) record_hit method:
+  - Record that `src_ip` sent a SYN to `port` at `timestamp`.
+  - takes in 4 arguments:
+    - self - the object of the class tracker
+    - src_ip - the ip address of the hacker or machine carrying out a port scan
+    - port - the port that was hit or scanned
+    - timestamp - the exact time of the hit or scan
+- (b) get_ports_in_window method:
+  - Return the set of distinct ports `src_ip` has hit within the last `window_seconds`, relative to `now`.
+  - takes in 3 arguments:
+    - self - the object of the class tracker
+    - window_seconds - the time or window used to check for, e.g 10 seconds ago
+    - now - the time of now, used hand in hand with timestamp(from hit recorded), to measure how long has it been since the last hit or scan
+- (c) prune method:
+  - Housekeeping: discard hits older than `max_age_seconds` so memory doesn't grow unbounded during a long-running capture. If an IP has no remaining hits after pruning, remove it entirely from internal state.
+  - takes in 3 arguments:
+    - self - the object of the class tracker
+    - now - the time of now, used hand in hand with timestamp(from hit recorded), to measure how long has it been since the last hit or scan
+    - max_age_seconds - the time or window used to check for, e.g 10 seconds ago
+
+~ The tracker.py file, is responsible for tracking, recording and maintaining the hits/port scans that occurred or were carried out on the machine
