@@ -12,7 +12,6 @@ Some legitimate applications do check for open ports as part of normal operation
     - threshold - number of ports to confirm it is an actual scan
   - The threshold will be set by the user admin, depending on what you consider a potential threat, if the port count is greater than the threshold, then it is a valid reconn scan, function returns true, otherwise false
   - A normal service would typically use not more than 5 ports on your device, and 5 is just strecthing, probably less than 5, however modern day applications could need to run a number of services relying on a number of ports to be open, e.g. a web server app, that sends messages between devices through the SSH protocol, all while saving image, visual and audio data through the ftp protocol, nonetheless, the user will determine the threshold according to the users preference.
-
 - (b) classify_severity() function
   - Classify how aggressive a detected scan is, based on ports-per-second.
   - takes in 2 arguments:
@@ -24,6 +23,8 @@ Some legitimate applications do check for open ports as part of normal operation
     - slow - measured if a large number of ports was scanned over quite a long period of time
   - each time taken for each scan doesn't not rule out the potential for it being an attack, even if the ports scanned happened over a long period of time, it just how careful the attacker is - if ever the scan happens to be malicious.
 
+~ The detector.py file will act as a module to aid at detecting a threat, depending on the threshold set and number of ports it hit, while also having a function to classify the threat considering the time a hacker took to scan or hit the ports
+
 2. The allowlist.py file - features 2 functions
 - (a) load_allowlist() function
   - Load a newline-separated file of IP addresses into a set.
@@ -33,3 +34,24 @@ Some legitimate applications do check for open ports as part of normal operation
   - takes in 2 arguments:
     - ip - the ip address to checked if it is in the non threat ip addresses
     - allowlist - the list in a set of allowed ip address that are not considered threats
+
+~ The allowlist.py file will act as a filter of sort, to mitigate from having false positives, that's having the system detect scans that are not of malicious intent, this will allow the system to have a list of ip addresses that are considered safe to scan the machine, and can also help if we want to set a more aggressive threshold to catch any outside or unwanted device even it just scanned one port
+
+3. The alerting.py file - features 3 functions
+- (a) build_alert() function:
+  - Assemble a structured alert dict from a detected scan.
+  - takes in 2 arguments:
+    - src_ip - the ip address of the machine that executed the port scan
+    - ports - the ports that it hit in a set
+    - severity - the severity of the hit, refer to the detector.py file, the method classify_severity, depending on the number of ports hit within a time period or window, will determine the severity of the scan, between aggressive, moderate and slow
+    - window_seconds - the time it took for the machine/perpetrator to scan all ports
+- (b) format_alert_text() function:
+  - Render an alert dict as a human-readable one-line-or-so string suitable for printing to the terminal in real time.
+  - takes one argument - alert - a dictionary of the alert
+- (c) log_alert_json() function:
+  - Append an alert to a JSON-lines log file (one JSON object per line).
+  - takes in 2 arguments:
+    - alert - a dictionary of the alert
+    - filepath - the file to log the json alerts to
+
+~ The alerting.py file will act as a module to simply build the alerts structure, calling each function under a specific section in the codebase but for only building, logging and saving the alerts/hits
