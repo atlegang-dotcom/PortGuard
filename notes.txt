@@ -117,10 +117,26 @@ Walkthrough each module:
 
 7. cli.py - features 2 functions:
 - (a) build_arg_parser function:
+  - used primarily to build the arguments, which will be parsed by the parse_args function - (Construct (but do not invoke) the argparse.ArgumentParser.)
   - takes in 0 arguments
-  - used primarily to build the arguments, which will be parsed by the parse_args function
 - (b) parse_args function:
+  - used to parse the arguments and ultimately builds the args object - (Parse command-line arguments using build_arg_parser())
   - takes in 0 arguments
-  - used to parse the arguments and ultimately builds the args object
 
 ~ the cli.py is used to create the command line arguments required to run the application, it builds an argument parser, that will work hand in hand with parse_args function, where inside the parse_args we call the parse_args function from argparse, which will build a args object, making it easier to access the arguments parsed in the command line interface
+
+8. main.py - features 3 functions:
+- (a) print_welcome function:
+  - Used to print the welcome message when the application returns
+  - takes in 0 arguments
+- (b) print_status function:
+  - Used to print the set conditions for it to run, prints which interfaces it will listen to for any port scans, prints the threshold set, the window in seconds set, checks if there is an allowlist set, then prints the number of ip addresses to ignore, and then checks if a log path was parsed, if yes it prints logging alerts to {file path}
+  - takes in 3 arguments:
+    - args - an args object built or returned by the cli.py module
+    - interfaces - the interfaces it will be listening to or on
+    - allowlist - the list in a set of allowed ip address that are not considered threats
+- (c) run function:
+  - CLI entry point: parse args, set up state, start the live capture.
+  - takes in 1 argument - argv - argument list, or None to use sys.argv
+
+~ The main.py file, wires everything together, computes the arguments parsed and then starts the capturing process, will log any scan alerts to the terminal
