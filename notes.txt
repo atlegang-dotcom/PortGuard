@@ -4,40 +4,42 @@ A command-line tool that detects TCP port scanning against your device. It monit
 
 Some legitimate applications do check for open ports as part of normal operation — checking for port 443 to see if you're running a web server, or port 22 before attempting SSH. This kind of legitimate check typically touches only one or two ports, rarely more than 3-5, because a normal application already knows which specific service it needs and has no reason to probe broadly. A device touching many distinct ports on you in a short window has no such legitimate reason — that pattern is reconnaissance, not service discovery, and is the behavior this tool is built to catch.
 
-1. The detector.py file - features 2 functions
+Walkthrough each module:
+
+1. detector.py - features 2 functions
 - (a) is_scan() function 
   - Decide whether a distinct-port count within a time window counts as a scan.
   - takes in 2 arguments:
     - port_count - number of ports scanned in a time window
     - threshold - number of ports to confirm it is an actual scan
   - The threshold will be set by the user admin, depending on what you consider a potential threat, if the port count is greater than the threshold, then it is a valid reconn scan, function returns true, otherwise false
-  - A normal service would typically use not more than 5 ports on your device, and 5 is just strecthing, probably less than 5, however modern day applications could need to run a number of services relying on a number of ports to be open, e.g. a web server app, that sends messages between devices through the SSH protocol, all while saving image, visual and audio data through the ftp protocol, nonetheless, the user will determine the threshold according to the users preference.
+  - A normal service would typically use not more than 5 ports on your device, and 5 is just strecthing, probably less than 5, however modern day applications could need to run a number of services relying on a number of ports to be open, e.g. a web server app, that sends messages between devices through the SSH protocol, all while saving image, video and audio data through the ftp protocol, nonetheless, the user will determine the threshold according to the users preference.
 - (b) classify_severity() function
   - Classify how aggressive a detected scan is, based on ports-per-second.
   - takes in 2 arguments:
     - port_count - number of ports scanned in a time window
-    - window_seconds - the amount of time it took to scann all ports
-  - the severity will classfied into 3 categories using the formula - port_count / window_seconds = port scan/sec
+    - window_seconds - the amount of time it took to scan all ports
+  - the severity will classfied into 3 categories using the formula - port_count / window_seconds = port scan/sec or rate
     - aggressive - measured if a lot of ports were scanned in a short space of time
-    - moderate - measured if a medium level(less than aggressive greater than low) amount of ports were scanned in a less than aggressive greater than low space of time
+    - moderate - measured if a medium level amount of ports were scanned in a less than aggressive greater than slow space of time
     - slow - measured if a large number of ports was scanned over quite a long period of time
-  - each time taken for each scan doesn't not rule out the potential for it being an attack, even if the ports scanned happened over a long period of time, it just how careful the attacker is - if ever the scan happens to be malicious.
+  - each time taken for each scan does not rule out the potential for it being an attack, even if the ports scanned happened over a long period of time, it just shows how careful the attacker is, for some scans that are slow might not be caught, as it could scan for ports over a period exceeding the time window given for it to be classfied as a threat - if ever the scan happens to be malicious.
 
 ~ The detector.py file will act as a module to aid at detecting a threat, depending on the threshold set and number of ports it hit, while also having a function to classify the threat considering the time a hacker took to scan or hit the ports
 
-2. The allowlist.py file - features 2 functions
+2. allowlist.py - features 2 functions
 - (a) load_allowlist() function
   - Load a newline-separated file of IP addresses into a set.
-  - takes one argument - filepath: of the file containing ip addresses are not a threat to the system
+  - takes one argument - filepath: of the file containing ip addresses that are considered not a threat to the system
 - (b) is_allowlisted() function
   - Check whether `ip` is in `allowlist`.
   - takes in 2 arguments:
-    - ip - the ip address to checked if it is in the non threat ip addresses
+    - ip - the ip address to be checked if it is in the non threat ip address list
     - allowlist - the list in a set of allowed ip address that are not considered threats
 
-~ The allowlist.py file will act as a filter of sort, to mitigate from having false positives, that's having the system detect scans that are not of malicious intent, this will allow the system to have a list of ip addresses that are considered safe to scan the machine, and can also help if we want to set a more aggressive threshold to catch any outside or unwanted device even it just scanned one port
+~ The allowlist.py file will act as a filter of sort, to mitigate from having false positives, that's having the system detect scans that are not of malicious intent, this will allow the system to have a list of ip addresses that are considered safe to scan the machine, and can also help if we want to set a more aggressive threshold to catch any outside or unwanted device even if it just scanned one port
 
-3. The alerting.py file - features 3 functions
+3. alerting.py - features 3 functions
 - (a) build_alert() function:
   - Assemble a structured alert dict from a detected scan.
   - takes in 2 arguments:
@@ -54,9 +56,9 @@ Some legitimate applications do check for open ports as part of normal operation
     - alert - a dictionary of the alert
     - filepath - the file to log the json alerts to
 
-~ The alerting.py file will act as a module to simply build the alerts structure, calling each function under a specific section in the codebase but for only building, logging and saving the alerts/hits
+~ The alerting.py file will act as a module to simply build the alerts structure, calling each function under a specific section in the codebase but for only building, logging and saving the alerts/hits, saving a json will be optional, depending on the cmd line arguments passed
 
-4. The tracker.py file - features a class with 1 constructor and 3 methods:
+4. tracker.py - features a class with 1 constructor and 3 methods:
 - (a) record_hit method:
   - Record that `src_ip` sent a SYN to `port` at `timestamp`.
   - takes in 4 arguments:
@@ -68,7 +70,7 @@ Some legitimate applications do check for open ports as part of normal operation
   - Return the set of distinct ports `src_ip` has hit within the last `window_seconds`, relative to `now`.
   - takes in 3 arguments:
     - self - the object of the class tracker
-    - window_seconds - the time or window used to check for, e.g 10 seconds ago
+    - window_seconds - the time or window used to check for in seconds, e.g 10 seconds ago
     - now - the time of now, used hand in hand with timestamp(from hit recorded), to measure how long has it been since the last hit or scan
 - (c) prune method:
   - Housekeeping: discard hits older than `max_age_seconds` so memory doesn't grow unbounded during a long-running capture. If an IP has no remaining hits after pruning, remove it entirely from internal state.
@@ -78,3 +80,17 @@ Some legitimate applications do check for open ports as part of normal operation
     - max_age_seconds - the time or window used to check for, e.g 10 seconds ago
 
 ~ The tracker.py file, is responsible for tracking, recording and maintaining the hits/port scans that occurred or were carried out on the machine
+
+5. capture.py - features 3 functions
+- (a) is_syn_packet function:
+  - Determine whether a scapy packet is a bare SYN (not SYN-ACK, not anything else) — i.e. the first packet of a TCP handshake attempt.
+  - takes in one argument - packet - the packet being sent to the machine
+- (b) extract_syn_info function:
+  -  Pull the fields Port Guard cares about out of a SYN packet.
+  - takes in one argument - packet - the packet to extract fields after confirming the scan is indeed a SYN packet
+- (c) start_capture function:
+  - Begin a LIVE, BLOCKING packet capture on `interface`, calling `on_packet(packet)` for every packet seen. Requires root/admin.
+  - takes in one argument - on_packet - a callback function that handle any packet found it ever it is a potential threat.
+  - the sniff will listen across all interfaces found on the device, for any SYN packets, then leave it to the application to handle it if suspected of any malicious intent or not
+
+~ The capture.py file, is responsible for determining if whether a packet sent to the machine is a SYN packet or not, checking if it has a TCP layer or header in the packet stack, extracting the SYN packet info required by the application and finally listening on all interfaces on the machine, to detect any threat coming from multiple interfaces such as a packet sent through a wifi connection, from the machine itself and or any wired ethernet connection, it uses scapys get_if_list() to get all interfaces and sniff() to start listening for packets
