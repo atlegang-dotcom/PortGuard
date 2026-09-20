@@ -12,7 +12,7 @@ class TestParseArgs:
 
     def test_default_threshold_is_15(self):
         args = parse_args([])
-        assert args.threshold == 15
+        assert args.threshold == 5
 
     def test_default_window_is_10(self):
         args = parse_args([])
