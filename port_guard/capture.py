@@ -2,7 +2,7 @@
 
 from typing import Callable, Dict, List, Optional, Union
 from scapy.all import IP, TCP, IPv6, sniff, get_if_list
-from port_guard.helper import ip_filter
+from port_guard.helper import ip_filter, list_interfaces
 
 
 def is_syn_packet(packet) -> bool:
@@ -30,7 +30,7 @@ def extract_syn_info(packet) -> Optional[Dict]:
 
 def start_capture(on_packet: Callable) -> None:
     sniff(
-        iface=get_if_list(),
+        iface=list_interfaces(),
         filter="tcp",
         prn=on_packet,
         store=False
