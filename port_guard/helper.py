@@ -1,5 +1,6 @@
 import ipaddress as ip
 from scapy.all import IP, IPv6, get_if_list
+from typing import List, Optional
 
 # Checks/validates ip address, returns True if it's a valid ip address, false if not
 def check_ip(ip_addr) -> bool:
@@ -10,7 +11,7 @@ def check_ip(ip_addr) -> bool:
         return False
 
 # checks or validates if a port scanned/hit is within the range now - timestamp <= window_seconds
-def filter_hits(hits: list, window: float, now: float) -> bool:
+def filter_hits(hits: list, window: float, now: float) -> list:
     result = []
     for hit in hits:
         if now - hit[1] <= window:
@@ -19,7 +20,7 @@ def filter_hits(hits: list, window: float, now: float) -> bool:
     return result
 
 # filter between IPv6 and IPv4, by checking each for the ip layer they belong too, returns an IP address of the layer that is found
-def ip_filter(packet) -> str:
+def ip_filter(packet) -> Optional[str]:
     if packet.haslayer(IP):
         return packet[IP].src
         
