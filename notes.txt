@@ -94,3 +94,23 @@ Walkthrough each module:
   - the sniff will listen across all interfaces found on the device, for any SYN packets, then leave it to the application to handle it if suspected of any malicious intent or not
 
 ~ The capture.py file, is responsible for determining if whether a packet sent to the machine is a SYN packet or not, checking if it has a TCP layer or header in the packet stack, extracting the SYN packet info required by the application and finally listening on all interfaces on the machine, to detect any threat coming from multiple interfaces such as a packet sent through a wifi connection, from the machine itself and or any wired ethernet connection, it uses scapys get_if_list() to get all interfaces and sniff() to start listening for packets
+
+6. guard.py - features one function:
+- handle_packet function:
+  - Process one captured packet through the full detection pipeline.
+  - takes in 5 arguments:
+    - packet - a scapy packet object (real capture or, in tests, a packet built in memory with IP()/TCP(...)).
+    - tracker - a PortActivityTracker instance (state persists across calls 
+    - the caller in main.py owns one long-lived instance for the whole capture session).
+    - threshold - distinct-port threshold, passed to detector.is_scan. window_seconds - tracking window, passed to tracker + detector.
+    - allowlist - set of IPs to ignore, from allowlist.load_allowlist.
+
+~ The guard.py is basically a compilation of all the modules in the system, excluding the cli and main files, it joins together all the "necessary" functions handling a packet to determine if it is a threat or not, following the pipeline as follows:
+  - 1. capture.extract_syn_info(packet) — bail (return None) if this packet isn't a SYN packet at all
+  - 2. allowlist.is_allowlisted(src_ip, allowlist) — bail if True
+  - 3. tracker.record_hit(src_ip, dst_port, timestamp)
+  - 4. tracker.get_ports_in_window(src_ip, window_seconds, timestamp)
+  - 5. detector.is_scan(len(ports), threshold) — bail if False
+  - 6. detector.classify_severity(len(ports), window_seconds)
+  - 7. alerting.build_alert(...) and return it
+~ it returns a dict alert if there was a threat found and returns None if no threat was found
