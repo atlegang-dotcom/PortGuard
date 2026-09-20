@@ -114,3 +114,13 @@ Walkthrough each module:
   - 6. detector.classify_severity(len(ports), window_seconds)
   - 7. alerting.build_alert(...) and return it
 ~ it returns a dict alert if there was a threat found and returns None if no threat was found
+
+7. cli.py - features 2 functions:
+- (a) build_arg_parser function:
+  - takes in 0 arguments
+  - used primarily to build the arguments, which will be parsed by the parse_args function
+- (b) parse_args function:
+  - takes in 0 arguments
+  - used to parse the arguments and ultimately builds the args object
+
+~ the cli.py is used to create the command line arguments required to run the application, it builds an argument parser, that will work hand in hand with parse_args function, where inside the parse_args we call the parse_args function from argparse, which will build a args object, making it easier to access the arguments parsed in the command line interface
