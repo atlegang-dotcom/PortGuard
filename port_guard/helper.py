@@ -1,5 +1,5 @@
 import ipaddress as ip
-from scapy.all import IP, IPv6
+from scapy.all import IP, IPv6, get_if_list
 
 # Checks/validates ip address, returns True if it's a valid ip address, false if not
 def check_ip(ip_addr) -> bool:
@@ -28,3 +28,7 @@ def ip_filter(packet) -> str:
 
     else:
         return None
+
+# return all interfaces on machine
+def list_interfaces() -> List[str]:
+    return get_if_list()
