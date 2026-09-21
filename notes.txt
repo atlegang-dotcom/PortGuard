@@ -140,3 +140,14 @@ Walkthrough each module:
   - takes in 1 argument - argv - argument list, or None to use sys.argv
 
 ~ The main.py file, wires everything together, computes the arguments parsed and then starts the capturing process, will log any scan alerts to the terminal
+
+Limitations:
+1. The program can only detect SYN packets sent from another device, it cannot block them, it's primary usage to only detect potential malicious port scans
+
+2. Depending on the threshold or window you set, it will only detect port scans that exceed the threshold set, anything below it will not be able to detect, make use of the allowlist to mitigate any false threats and port scans done over a long period of time will be skipped, it looks for port scans that are in a certain window, any scan greater than the window set, it will ignore
+
+3. Distributed or multiple attack or scan, unless the devices are all within the bounds of a threat according to our system, PortGuard will not be able to detect multiple port scans from different devices carefully orchestrated by one machine, however this can be fixed with having an allowlist and setting a tighter threshold, otherwise the devices can scan through the ports and will look like normal traffic, provided that each scan is below our threshold
+
+4. FIN/NULL/XMAS and other flag-evasion scan types — is_syn_packet requires exactly flags == "S"; scans deliberately using different flag combinations to evade SYN-based detection aren't SYN packets at all, so they pass through undetected by design.
+
+5. UDP scans — the filter="tcp" BPF filter drops UDP traffic before it ever reaches PortGuard.
