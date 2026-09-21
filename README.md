@@ -49,18 +49,18 @@ Linux and Mac don't need Npcap — raw packet capture is available natively via 
    ```
    python -m port_guard.main
    ```
-   With no arguments, PortGuard runs with its defaults: threshold `15`, window `10.0` seconds, no allowlist, no log file, listening across every interface on the machine. Add flags to override any of these:
+   With no arguments, PortGuard runs with its defaults: threshold `5`, window `10.0` seconds, no allowlist, no log file, listening across every interface on the machine. Add flags to override any of these:
 
    | Flag | Description | Default |
    |---|---|---|
-   | `-n`, `--threshold` | distinct ports required to trigger an alert | `15` |
+   | `-n`, `--threshold` | distinct ports required to trigger an alert | `5` |
    | `-w`, `--window` | tracking window, in seconds | `10.0` |
    | `--allowlist` | path to a file of known-safe IPs, one per line | none |
    | `--log` | path to append JSON-lines alerts to | none |
 
    Example, more sensitive threshold with logging enabled:
    ```
-   python -m port_guard.main -n 5 -w 5 --log alerts.jsonl
+   python -m port_guard.main -n 3 -w 5 --log alerts.jsonl
    ```
 
    The tool runs continuously once started — it does not exit on its own. Press `Ctrl+C` to stop it.
