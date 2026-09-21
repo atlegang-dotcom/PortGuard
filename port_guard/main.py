@@ -1,6 +1,7 @@
 # Orchestration layer: wires CLI args, allowlist loading, the tracker, and the live capture together.
 
 import argparse
+import time
 from typing import List, Optional, Set
 
 from port_guard.allowlist import load_allowlist
@@ -43,8 +44,10 @@ def run(argv: Optional[List[str]] = None) -> int:
     threshold = args.threshold
     window = args.window
     log = args.log
+    packet_count = 0
 
     def on_packet(packet):
+        packet_count += 1
         alert = handle_packet(packet, tracker, threshold, window, allowlist)
 
         if alert:
@@ -52,6 +55,9 @@ def run(argv: Optional[List[str]] = None) -> int:
 
             if log:
                 log_alert_json(alert, log)
+
+        if packet_count % 100 == 0:
+            tracker.prune(time.time(), window)
 
     start_capture(on_packet)
     return 0
