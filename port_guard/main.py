@@ -47,6 +47,7 @@ def run(argv: Optional[List[str]] = None) -> int:
     packet_count = 0
 
     def on_packet(packet):
+        nonlocal packet_count
         packet_count += 1
         alert = handle_packet(packet, tracker, threshold, window, allowlist)
 
